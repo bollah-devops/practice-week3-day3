@@ -1,0 +1,35 @@
+---
+- name: Deploy week3 debug app
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Pull Docker image
+      docker_image:
+        name: tawa123/week3-debug
+        tag: latest
+        source: pull
+
+    - name: Stop old container
+      docker_container:
+        name: week3-debug
+        state: absent
+        force_kill: yes
+
+    - name: Run container
+      docker_container:
+        name: week3-debug
+        image: tawa123/week3-debug:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "5000:5000"
+
+    - name: Verify app
+      uri:
+        url: http://localhost:5000
+        status_code: 200
